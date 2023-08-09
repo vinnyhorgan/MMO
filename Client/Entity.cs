@@ -1,14 +1,17 @@
+using System;
+using System.Collections.Generic;
 using System.Numerics;
 
-namespace Server
+namespace Client
 {
-    class Player
+    class Entity
     {
         public ushort Id;
         public Vector2 Position;
         public int Speed = 5;
+        public List<NetworkManager.Position> Positions = new();
 
-        public Player(ushort id, Vector2 position)
+        public Entity(ushort id, Vector2 position)
         {
             Id = id;
             Position = position;
@@ -35,6 +38,11 @@ namespace Server
             {
                 Position.X += Speed;
             }
+        }
+
+        public void AddPosition(Vector2 position)
+        {
+            Positions.Add(new NetworkManager.Position(DateTimeOffset.Now.ToUnixTimeMilliseconds(), position));
         }
     }
 }

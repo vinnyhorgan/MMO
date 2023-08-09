@@ -1,29 +1,14 @@
-using System;
-using System.Collections.Generic;
 using System.Numerics;
 
-namespace Client
+namespace Server
 {
-    class Position
-    {
-        public long Timestamp;
-        public Vector2 Value;
-
-        public Position(long timestamp, Vector2 value)
-        {
-            Timestamp = timestamp;
-            Value = value;
-        }
-    }
-
-    class Player
+    class Entity
     {
         public ushort Id;
         public Vector2 Position;
         public int Speed = 5;
-        public List<Position> Positions = new();
 
-        public Player(ushort id, Vector2 position)
+        public Entity(ushort id, Vector2 position)
         {
             Id = id;
             Position = position;
@@ -50,11 +35,6 @@ namespace Client
             {
                 Position.X += Speed;
             }
-        }
-
-        public void AddPosition(Vector2 position)
-        {
-            Positions.Add(new Position(DateTimeOffset.Now.ToUnixTimeMilliseconds(), position));
         }
     }
 }

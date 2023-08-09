@@ -1,7 +1,60 @@
+using System;
+
 namespace Server
 {
     class NN
     {
+        public int[] NetworkShape = { 2, 4, 4, 2 };
+        public Layer[] Layers;
+
+        public void Init()
+        {
+            Layers = new Layer[NetworkShape.Length - 1];
+
+            for (int i = 0; i < Layers.Length; i++)
+            {
+                Layers[i] = new Layer(NetworkShape[i], NetworkShape[i + 1]);
+            }
+        }
+
+        public float[] Brain(float[] inputs)
+        {
+            for (int i = 0; i < Layers.Length; i++)
+            {
+                if (i == 0)
+                {
+                    Layers[i].Forward(inputs);
+                    Layers[i].Activation();
+                }
+                else if (i == Layers.Length - 1)
+                {
+                    Layers[i].Forward(Layers[i - 1].Nodes);
+                }
+                else
+                {
+                    Layers[i].Forward(Layers[i - 1].Nodes);
+                    Layers[i].Activation();
+                }
+            }
+
+            return Layers[Layers.Length - 1].Nodes;
+        }
+
+        public Layer[] CopyLayers()
+        {
+            Layer[] tmpLayers = new Layer[NetworkShape.Length - 1];
+
+            for (int i = 0; i < Layers.Length; i++)
+            {
+                tmpLayers[i] = new Layer(NetworkShape[i], NetworkShape[i + 1]);
+
+                Array.Copy(Layers[i].Weights, tmpLayers[i].Weights, Layers[i].Weights.GetLength(0) * Layers[i].Weights.GetLength(1));
+                Array.Copy(Layers[i].Biases, tmpLayers[i].Biases, Layers[i].Biases.GetLength(0));
+            }
+
+            return tmpLayers;
+        }
+
         public class Layer
         {
             public float[,] Weights;
@@ -46,42 +99,6 @@ namespace Server
                     }
                 }
             }
-        }
-
-        public int[] NetworkShape = { 2, 4, 4, 2 };
-        public Layer[] Layers;
-
-        public void Init()
-        {
-            Layers = new Layer[NetworkShape.Length - 1];
-
-            for (int i = 0; i < Layers.Length; i++)
-            {
-                Layers[i] = new Layer(NetworkShape[i], NetworkShape[i + 1]);
-            }
-        }
-
-        public float[] Brain(float[] inputs)
-        {
-            for (int i = 0; i < Layers.Length; i++)
-            {
-                if (i == 0)
-                {
-                    Layers[i].Forward(inputs);
-                    Layers[i].Activation();
-                }
-                else if (i == Layers.Length - 1)
-                {
-                    Layers[i].Forward(Layers[i - 1].Nodes);
-                }
-                else
-                {
-                    Layers[i].Forward(Layers[i - 1].Nodes);
-                    Layers[i].Activation();
-                }
-            }
-
-            return Layers[Layers.Length - 1].Nodes;
         }
     }
 }

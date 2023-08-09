@@ -72,6 +72,8 @@ namespace Server
 
             RiptideLogger.Initialize(Logger.Debug, Logger.Info, Logger.Warning, Logger.Error, false);
 
+            NetworkManager.Instance.Start();
+
             ScreenManager.Instance.SetScreen(new Screens.ServerScreen());
         }
 
@@ -95,6 +97,8 @@ namespace Server
                 _mouse = virtualMouse;
 
                 float dt = Raylib.GetFrameTime();
+
+                NetworkManager.Instance.Update(dt);
 
                 _controller.Update(dt);
 
@@ -132,6 +136,8 @@ namespace Server
 
                 Raylib.EndDrawing();
             }
+
+            NetworkManager.Instance.Stop();
 
             _controller.Dispose();
 

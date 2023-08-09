@@ -98,6 +98,8 @@ namespace Client
 
                 float dt = Raylib.GetFrameTime();
 
+                NetworkManager.Instance.Update(dt);
+
                 _controller.Update(dt);
 
                 ScreenManager.Instance.Update(dt);
@@ -134,6 +136,8 @@ namespace Client
 
                 Raylib.EndDrawing();
             }
+
+            NetworkManager.Instance.Disconnect();
 
             _controller.Dispose();
 
