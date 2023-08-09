@@ -1,12 +1,29 @@
-using System.Collections.Generic;
 using System.Numerics;
 using Raylib_cs;
-using Riptide;
 
 namespace Server.Screens
 {
     class ServerScreen : Screen
     {
+        public override void Load()
+        {
+            for (int i = 0; i < 10; i++)
+            {
+                // create a new player
+                var creature = new Creature((ushort)Raylib.GetRandomValue(100, 32767), new Vector2(Raylib.GetRandomValue(0, 1280), Raylib.GetRandomValue(0, 720)));
+
+                NetworkManager.Instance.Entities.Add(creature.Id, creature);
+            }
+        }
+
+        public override void Update(float dt)
+        {
+            foreach (var entity in NetworkManager.Instance.Entities.Values)
+            {
+                entity.Update();
+            }
+        }
+
         public override void Draw()
         {
             Raylib.DrawTextEx(Game.Instance.Font, $"Server running on port: {NetworkManager.Instance.Server.Port}", new Vector2(10, 10), Game.Instance.Font.baseSize, 0, Color.WHITE);

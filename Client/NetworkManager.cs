@@ -6,6 +6,46 @@ using Riptide;
 
 namespace Client
 {
+    enum EntityTypes : byte
+    {
+        Player = 1,
+        Creature
+    }
+
+    enum ServerToCliendMessage : ushort
+    {
+        WorldUpdate = 1
+    }
+
+    enum ClientToServerMessage : ushort
+    {
+        PlayerInput = 1
+    }
+
+    public class Input
+    {
+        public bool[] Inputs;
+        public ushort InputSequenceNumber;
+
+        public Input(bool[] inputs, ushort inputSequenceNumber)
+        {
+            Inputs = inputs;
+            InputSequenceNumber = inputSequenceNumber;
+        }
+    }
+
+    public class Position
+    {
+        public long Timestamp;
+        public Vector2 Value;
+
+        public Position(long timestamp, Vector2 value)
+        {
+            Timestamp = timestamp;
+            Value = value;
+        }
+    }
+
     class NetworkManager
     {
         private static NetworkManager _instance;
@@ -13,21 +53,11 @@ namespace Client
         private Riptide.Client _client;
         private int _updateRate = 50;
         private float _timer = 0;
-        public ushort _id = 0;
-        public Dictionary<ushort, Entity> _entities = new();
+        private ushort _id = 0;
+        private Dictionary<ushort, Entity> _entities = new();
         private bool[] _inputs = new bool[4];
         private List<Input> _pendingInputs = new();
         private ushort _inputSequenceNumber = 0;
-
-        public enum ServerToCliendMessage : ushort
-        {
-            WorldUpdate = 1
-        }
-
-        public enum ClientToServerMessage : ushort
-        {
-            PlayerInput = 1
-        }
 
         public static NetworkManager Instance
         {
@@ -93,13 +123,14 @@ namespace Client
             for (int i = 0; i < entityCount; i++)
             {
                 ushort id = message.GetUShort();
+                EntityTypes type = (EntityTypes)message.GetByte();
                 int x = message.GetInt();
                 int y = message.GetInt();
                 ushort lastProcessedInput = message.GetUShort();
 
                 if (!Instance._entities.ContainsKey(id))
                 {
-                    Instance._entities.Add(id, new Entity(id, new Vector2(x, y)));
+                    Instance._entities.Add(id, new Entity(id, type, new Vector2(x, y)));
                 }
 
                 var entity = Instance._entities[id];
@@ -246,30 +277,6 @@ namespace Client
         private void PlayerLeft(object sender, ClientDisconnectedEventArgs e)
         {
             _entities.Remove(e.Id);
-        }
-
-        public class Input
-        {
-            public bool[] Inputs;
-            public ushort InputSequenceNumber;
-
-            public Input(bool[] inputs, ushort inputSequenceNumber)
-            {
-                Inputs = inputs;
-                InputSequenceNumber = inputSequenceNumber;
-            }
-        }
-
-        public class Position
-        {
-            public long Timestamp;
-            public Vector2 Value;
-
-            public Position(long timestamp, Vector2 value)
-            {
-                Timestamp = timestamp;
-                Value = value;
-            }
         }
     }
 }

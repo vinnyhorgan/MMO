@@ -1,14 +1,17 @@
 using System;
+using Raylib_cs;
 
 namespace Server
 {
     class NN
     {
-        public int[] NetworkShape = { 2, 4, 4, 2 };
+        public int[] NetworkShape;
         public Layer[] Layers;
 
-        public void Init()
+        public NN(int[] networkShape)
         {
+            NetworkShape = networkShape;
+
             Layers = new Layer[NetworkShape.Length - 1];
 
             for (int i = 0; i < Layers.Length; i++)
@@ -55,6 +58,14 @@ namespace Server
             return tmpLayers;
         }
 
+        public void MutateNetwork(float mutationChance, float mutationAmount)
+        {
+            for (int i = 0; i < Layers.Length; i++)
+            {
+                Layers[i].MutateLayer(mutationChance, mutationAmount);
+            }
+        }
+
         public class Layer
         {
             public float[,] Weights;
@@ -71,31 +82,46 @@ namespace Server
 
                 Weights = new float[numNodes, numInputs];
                 Biases = new float[numNodes];
-                Nodes = new float[numNodes];
             }
 
             public void Forward(float[] inputs)
             {
+                Nodes = new float[_numNodes];
+
                 for (int i = 0; i < _numNodes; i++)
                 {
-                    float sum = 0;
-
                     for (int j = 0; j < _numInputs; j++)
                     {
-                        sum += inputs[j] * Weights[i, j];
+                        Nodes[i] += inputs[j] * Weights[i, j];
                     }
 
-                    Nodes[i] = sum + Biases[i];
+                    Nodes[i] += Biases[i];
                 }
             }
 
             public void Activation()
             {
-                for (int i = 0; i < _numNodes; i++)
+                for (int i = 0; i < Nodes.Length; i++)
                 {
-                    if (Nodes[i] < 0)
+                    Nodes[i] = (float)Math.Tanh(Nodes[i]);
+                }
+            }
+
+            public void MutateLayer(float mutationChance, float mutationAmount)
+            {
+                for(int i = 0; i < _numNodes; i++)
+                {
+                    for(int j = 0; j < _numInputs; j++)
                     {
-                        Nodes[i] = 0;
+                        if(Raylib.GetRandomValue(0, 100) / 100.0f < mutationChance)
+                        {
+                            Weights[i,j] += Raylib.GetRandomValue(-100, 100) / 100.0f * mutationAmount;
+                        }
+
+                        if(Raylib.GetRandomValue(0, 100) / 100.0f < mutationChance)
+                        {
+                            Biases[i] += Raylib.GetRandomValue(-100, 100) / 100.0f * mutationAmount;
+                        }
                     }
                 }
             }

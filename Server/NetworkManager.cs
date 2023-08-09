@@ -5,8 +5,36 @@ using Riptide;
 
 namespace Server
 {
+    interface IEntity
+    {
+        public ushort Id { get; }
+        public EntityTypes Type { get; }
+        public Vector2 Position { get; }
+
+        public void Move(bool[] input);
+        public void Update();
+    }
+
+    enum EntityTypes : byte
+    {
+        Player = 1,
+        Creature
+    }
+
+    enum ServerToCliendMessage : ushort
+    {
+        WorldUpdate = 1
+    }
+
+    enum ClientToServerMessage : ushort
+    {
+        PlayerInput = 1
+    }
+
     class NetworkManager
     {
+        public Dictionary<ushort, IEntity> Entities = new();
+
         private static NetworkManager _instance;
 
         private int _port = 7777;
@@ -15,18 +43,7 @@ namespace Server
         private Riptide.Server _server;
         private int _updateRate = 10;
         private float _timer = 0;
-        private Dictionary<ushort, Entity> _entities = new();
         private Dictionary<ushort, ushort> _lastProcessedInputs = new();
-
-        public enum ServerToCliendMessage : ushort
-        {
-            WorldUpdate = 1
-        }
-
-        public enum ClientToServerMessage : ushort
-        {
-            PlayerInput = 1
-        }
 
         public static NetworkManager Instance
         {
@@ -82,7 +99,7 @@ namespace Server
         {
             var inputs = message.GetBools(4);
 
-            var entity = Instance._entities[clientId];
+            var entity = Instance.Entities[clientId];
 
             entity.Move(inputs);
 
@@ -93,11 +110,12 @@ namespace Server
         {
             var message = Message.Create(MessageSendMode.Unreliable, (ushort)ServerToCliendMessage.WorldUpdate);
 
-            message.AddUShort((ushort)_entities.Count);
+            message.AddUShort((ushort)Entities.Count);
 
-            foreach (var entity in _entities.Values)
+            foreach (var entity in Entities.Values)
             {
                 message.AddUShort(entity.Id);
+                message.AddByte((byte)entity.Type);
                 message.AddInt((int)entity.Position.X);
                 message.AddInt((int)entity.Position.Y);
 
@@ -116,13 +134,13 @@ namespace Server
 
         private void PlayerConnected(object sender, ServerConnectedEventArgs e)
         {
-            var entity = new Entity(e.Client.Id, new Vector2(Raylib.GetRandomValue(0, 1280), Raylib.GetRandomValue(0, 720)));
-            _entities.Add(e.Client.Id, entity);
+            var entity = new Player(e.Client.Id, new Vector2(Raylib.GetRandomValue(0, 1280), Raylib.GetRandomValue(0, 720)));
+            Entities.Add(e.Client.Id, entity);
         }
 
         private void PlayerDisconnected(object sender, ServerDisconnectedEventArgs e)
         {
-            _entities.Remove(e.Client.Id);
+            Entities.Remove(e.Client.Id);
         }
     }
 }
