@@ -16,12 +16,24 @@ namespace Client.Screens
         PlayerInput = 1
     }
 
+    class Input
+    {
+        public bool[] Inputs;
+        public ushort InputSequenceNumber;
+
+        public Input(bool[] inputs, ushort inputSequenceNumber)
+        {
+            Inputs = inputs;
+            InputSequenceNumber = inputSequenceNumber;
+        }
+    }
+
     class GameScreen : Screen
     {
         private Riptide.Client _client;
 
         private static Dictionary<ushort, Player> _players = new();
-        private static List<bool[]> _pendingInputs = new();
+        private static List<Input> _pendingInputs = new();
         private static ushort _inputSequenceNumber = 0;
         private static bool _serverReconciliation = true;
         private static bool _playerInterpolation = true;
@@ -95,13 +107,13 @@ namespace Client.Screens
                         {
                             var input = _pendingInputs[j];
 
-                            if (_inputSequenceNumber <= lastProcessedInput)
+                            if (input.InputSequenceNumber <= lastProcessedInput)
                             {
                                 _pendingInputs.RemoveAt(j);
                             }
                             else
                             {
-                                player.Move(input);
+                                player.Move(input.Inputs);
                                 j++;
                             }
                         }
@@ -205,7 +217,7 @@ namespace Client.Screens
                 bool[] copy = new bool[4];
                 Array.Copy(_inputs, copy, 4);
 
-                _pendingInputs.Add(copy);
+                _pendingInputs.Add(new Input(copy, (ushort)(_inputSequenceNumber - 1)));
 
                 _inputs = new bool[4];
             }
