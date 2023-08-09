@@ -4,31 +4,37 @@ namespace Server
 {
     class Player
     {
-        private ushort _id;
-        private Vector2 _position;
-        private bool[] _inputs = new bool[4];
-
-        public ushort Id
-        {
-            get { return _id; }
-        }
-
-        public Vector2 Position
-        {
-            get { return _position; }
-            set { _position = value; }
-        }
-
-        public bool[] Inputs
-        {
-            get { return _inputs; }
-            set { _inputs = value; }
-        }
+        public ushort Id;
+        public Vector2 Position;
+        public int Speed = 5;
 
         public Player(ushort id, Vector2 position)
         {
-            _id = id;
-            _position = position;
+            Id = id;
+            Position = position;
+        }
+
+        public void Move(bool[] input)
+        {
+            if (input[0])
+            {
+                Position.Y -= Speed;
+            }
+
+            if (input[1])
+            {
+                Position.Y += Speed;
+            }
+
+            if (input[2])
+            {
+                Position.X -= Speed;
+            }
+
+            if (input[3])
+            {
+                Position.X += Speed;
+            }
         }
     }
 }

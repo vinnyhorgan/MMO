@@ -65,8 +65,6 @@ namespace Server
             _target = Raylib.LoadRenderTexture(_gameWidth, _gameHeight);
             Raylib.SetTextureFilter(_target.texture, TextureFilter.TEXTURE_FILTER_POINT);
 
-            Raylib.SetWindowIcon(Raylib.LoadImageFromTexture(AssetManager.Instance.LoadTexture("logo.png")));
-
             _font = AssetManager.Instance.LoadFont("roboto.ttf", 18);
 
             _controller = new ImguiController();
